@@ -5,6 +5,7 @@ import java.util.ArrayList;
 //import java.util.Collections;
 //import java.util.Comparator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 //Processing library
 import processing.core.PApplet;
@@ -24,8 +25,8 @@ import parsing.ParseFeed;
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
  * Author: UC San Diego Intermediate Software Development MOOC team
- * @author Your name here
- * Date: July 17, 2015
+ * @author Zaver R
+ * Date: January 28, 2016
  * */
 public class EarthquakeCityMap extends PApplet {
 
@@ -51,14 +52,14 @@ public class EarthquakeCityMap extends PApplet {
 
 	
 	public void setup() {
-		size(950, 600, OPENGL);
+		size(1050, 600, OPENGL);
 
 		if (offline) {
-		    map = new UnfoldingMap(this, 200, 50, 700, 500, new MBTilesMapProvider(mbTilesString));
+		    map = new UnfoldingMap(this, 300, 50, 700, 500, new MBTilesMapProvider(mbTilesString));
 		    earthquakesURL = "2.5_week.atom"; 	// Same feed, saved Aug 7, 2015, for working offline
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 700, 500, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 300, 50, 700, 500, new Google.GoogleMapProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 			//earthquakesURL = "2.5_week.atom";
 		}
@@ -82,21 +83,21 @@ public class EarthquakeCityMap extends PApplet {
 	    	float mag = Float.parseFloat(magObj.toString());
 	    	// PointFeatures also have a getLocation method
 	    }
-	    
-	    // Here is an example of how to use Processing's color method to generate 
-	    // an int that represents the color yellow.  
-	    int yellow = color(255, 255, 0);
-	    
-	    //TODO: Add code here as appropriate
+
+	    for (PointFeature feature : earthquakes) {
+			markers.add(createMarker(feature));
+		}
+		map.addMarkers(markers);
 	}
 		
 	// A suggested helper method that takes in an earthquake feature and 
 	// returns a SimplePointMarker for that earthquake
-	// TODO: Implement this method and call it from setUp, if it helps
 	private SimplePointMarker createMarker(PointFeature feature)
 	{
-		// finish implementing and use this method, if it helps.
-		return new SimplePointMarker(feature.getLocation());
+		SimplePointMarker marker = new SimplePointMarker(feature.getLocation());
+		float magnitude = Float.parseFloat(feature.getProperty("magnitude").toString());
+		setColorAndSize(marker, magnitude);
+		return marker;
 	}
 	
 	public void draw() {
@@ -105,12 +106,68 @@ public class EarthquakeCityMap extends PApplet {
 	    addKey();
 	}
 
+	private void setColorAndSize(SimplePointMarker marker, float magnitude) {
+		if(magnitude < 4.0) {
+			marker.setColor(getColor(ColorCode.BLUE));
+			marker.setRadius(3.33f);
+		} else if(magnitude >= 4.0 && magnitude <= 4.9) {
+			marker.setColor(getColor(ColorCode.YELLOW));
+			marker.setRadius(6.66f);
+		} else {
+			marker.setColor(getColor(ColorCode.RED));
+			marker.setRadius(10.0f);
+		}
+	}
+
+	private int getColor(ColorCode code) {
+		switch (code) {
+			case RED:
+				return color(255, 0, 0);
+			case GREEN:
+				return color(0, 255, 0);
+			case BLUE:
+				return color(0, 0, 255);
+			case YELLOW:
+				return color(255, 255, 0);
+		}
+		return 0;
+	}
 
 	// helper method to draw key in GUI
-	// TODO: Implement this method to draw the key
-	private void addKey() 
-	{	
-		// Remember you can use Processing's graphics methods here
+	private void addKey()
+	{
+		//Set rectangle background color
+		fill(205, 255, 255);
+		rect(50, 50, 160, 200, 5);
+
+		textSize(14);
+		fill(0);
+		text("Earthquake key", 85, 75);
+
+		fill(getColor(ColorCode.RED));
+		ellipse(75, 100, 10, 10);
+		textSize(12);
+		fill(0);
+		text("5.0+ Magnitude", 95, 105);
+
+		fill(getColor(ColorCode.YELLOW));
+		ellipse(75, 130, 6.66f, 6.66f);
+		textSize(12);
+		fill(0);
+		text("4.0+ Magnitude", 95, 135);
+
+		fill(getColor(ColorCode.BLUE));
+		ellipse(75, 160, 3.33f, 3.33f);
+		textSize(12);
+		fill(0);
+		text("Below 4.0", 95, 165);
 	
+	}
+
+	private enum ColorCode {
+		RED,
+		GREEN,
+		BLUE,
+		YELLOW
 	}
 }
