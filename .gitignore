@@ -4,3 +4,4 @@
 *.iml
 **/build
 .recommenders
+*.class
