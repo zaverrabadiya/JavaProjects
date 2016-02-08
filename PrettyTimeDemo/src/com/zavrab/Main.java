@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        List<Date> dates = new PrettyTimeParser().parse("DVoy a la playa en tres días !");
+        List<Date> dates = new PrettyTimeParser().parse("We have meeting today and tomorrow and maybe in three days from now!");
         System.out.println("parsed dates: " + dates);
     }
 }
